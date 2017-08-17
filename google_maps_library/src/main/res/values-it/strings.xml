@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Google_maps_library</string>
+
+    <string name="gps_network_not_enabled">Per continuare consenti al dispositivo di attivare la geolocalizzazione tramite l\'apposito servizio di Google</string>
+    <string name="button_ok_label">OK</string>
+    <string name="button_cancel_label">ANNULLA</string>
+</resources>

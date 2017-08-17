@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Google_maps_library</string>
+
+    <string name="gps_network_not_enabled">To continue allowing your device to enable geolocation through the Google service</string>
+    <string name="button_ok_label">OK</string>
+    <string name="button_cancel_label">CANCEL</string>
+</resources>
