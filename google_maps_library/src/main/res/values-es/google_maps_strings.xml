@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gps_network_not_enabled">Para continuar permitiendo que tu dispositivo habilite la geolocalización a través del servicio de Google</string>
+    <string name="button_ok_label">OK</string>
+    <string name="button_cancel_label">CANCELAR</string>
+</resources>

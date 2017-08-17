@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gps_network_not_enabled">Um das gerät weiterhin in die lage zu versetzen, die geolokalisierung über den Google-Service zu ermöglichen</string>
+    <string name="button_ok_label">OK</string>
+    <string name="button_cancel_label">STORNIEREN</string>
+</resources>
