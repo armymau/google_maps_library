@@ -58,51 +58,24 @@ public abstract class GoogleMapsFragment extends Fragment implements GoogleApiCl
             locationClient.connect();
     }
 
-
-    /* GoogleApiClient.ConnectionCallbacks */
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.d(GoogleMapsConstants.TAG, "onConnected");
-        checkLocationPermissions();
-    }
-
-    @Override
-    public void onConnectionSuspended(int cause) {
-        Log.d(GoogleMapsConstants.TAG, "onConnectionSuspended: " + cause);
-    }
-    //***************************************************
-
-
-    /* GoogleApiClient.OnConnectionFailedListener */
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(GoogleMapsConstants.TAG, "onConnectionFailed: " + connectionResult);
-
-        if (connectionResult.hasResolution()) {
-            try {
-                connectionResult.startResolutionForResult(getActivity(), GoogleMapsConstants.RC_CONNECT);
-            } catch (IntentSender.SendIntentException e) {
-                Log.e(GoogleMapsConstants.TAG, "Unable to resolve connection issue", e);
-                Snackbar.make(getActivity().findViewById(android.R.id.content), "GMS result resolution failed, see log", Snackbar.LENGTH_LONG).show();
-            }
-        } else {
-            Snackbar.make((getActivity().findViewById(android.R.id.content)), "GMS connection failed: " + connectionResult.getErrorCode(), Snackbar.LENGTH_LONG).show();
-        }
-    }
-    //***************************************************
-
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        locationClient = new GoogleApiClient.Builder(getActivity())
+        initGoogleApi();
+    }
+
+    private void initGoogleApi() {
+        locationClient = createLocationClient(getActivity());
+        createLocationRequest();
+    }
+
+    private synchronized GoogleApiClient createLocationClient(Context context) {
+        return new GoogleApiClient.Builder(context)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-
-        createLocationRequest();
     }
 
     private void createLocationRequest() {
@@ -124,35 +97,25 @@ public abstract class GoogleMapsFragment extends Fragment implements GoogleApiCl
     public void startLocationUpdates() throws SecurityException {
         // The final argument to {@code requestLocationUpdates()} is a LocationListener
         // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
-        LocationServices.FusedLocationApi.requestLocationUpdates(locationClient, mLocationRequest, this);
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        Log.d(GoogleMapsConstants.TAG, "Location >>> latitude : " + location.getLatitude() + " longitude : " + location.getLongitude());
-        onLocationRetrieved(location);
+        if(locationClient != null) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(locationClient, mLocationRequest, this);
+        }
     }
 
     private void stopLocationUpdates() {
         // It is a good practice to remove location requests when the activity is in a paused or
         // stopped state. Doing so helps battery performance and is especially
         // recommended in applications that request frequent location updates.
-        LocationServices.FusedLocationApi.removeLocationUpdates(locationClient, this);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(GoogleMapsConstants.TAG, "onActivityResult:" + requestCode + ":" + resultCode + ":" + data);
-
-        if (requestCode == GoogleMapsConstants.RC_CONNECT) {
-            handleGmsConnectionResult(resultCode);
+        if(locationClient != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(locationClient, this);
         }
     }
 
     private void handleGmsConnectionResult(int resultCode) {
         if (resultCode == Activity.RESULT_OK) {
-            locationClient.connect();
+            if(locationClient != null) {
+                locationClient.connect();
+            }
         }
     }
 
@@ -231,6 +194,59 @@ public abstract class GoogleMapsFragment extends Fragment implements GoogleApiCl
             startLocationUpdates();
         }
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(GoogleMapsConstants.TAG, "onActivityResult:" + requestCode + ":" + resultCode + ":" + data);
+
+        if (requestCode == GoogleMapsConstants.RC_CONNECT) {
+            handleGmsConnectionResult(resultCode);
+        }
+    }
+
+
+    /* GoogleApiClient.ConnectionCallbacks */
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.d(GoogleMapsConstants.TAG, "onConnected");
+        checkLocationPermissions();
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        Log.d(GoogleMapsConstants.TAG, "onConnectionSuspended: " + cause);
+    }
+    //***************************************************
+
+
+    /* GoogleApiClient.OnConnectionFailedListener */
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.e(GoogleMapsConstants.TAG, "onConnectionFailed: " + connectionResult);
+
+        if (connectionResult.hasResolution()) {
+            try {
+                connectionResult.startResolutionForResult(getActivity(), GoogleMapsConstants.RC_CONNECT);
+            } catch (IntentSender.SendIntentException e) {
+                Log.e(GoogleMapsConstants.TAG, "Unable to resolve connection issue", e);
+                Snackbar.make(getActivity().findViewById(android.R.id.content), "GMS result resolution failed, see log", Snackbar.LENGTH_LONG).show();
+            }
+        } else {
+            Snackbar.make((getActivity().findViewById(android.R.id.content)), "GMS connection failed: " + connectionResult.getErrorCode(), Snackbar.LENGTH_LONG).show();
+        }
+    }
+    //***************************************************
+
+
+    /* LocationListener */
+    @Override
+    public void onLocationChanged(Location location) {
+        Log.d(GoogleMapsConstants.TAG, "Location >>> latitude : " + location.getLatitude() + " longitude : " + location.getLongitude());
+        onLocationRetrieved(location);
+    }
+    //***************************************************
+
 
     public abstract void onLocationRetrieved(Location location);
 }
