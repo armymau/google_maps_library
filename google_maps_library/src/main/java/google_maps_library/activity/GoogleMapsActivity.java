@@ -107,7 +107,7 @@ public abstract class GoogleMapsActivity extends RuntimePermissionsActivity {
         }
     }
 
-    private void checkLocationManager() {
+    public void checkLocationManager() {
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         boolean gps_enabled = false; boolean network_enabled = false;
         try {
@@ -141,14 +141,18 @@ public abstract class GoogleMapsActivity extends RuntimePermissionsActivity {
     public void startLocationUpdates() throws SecurityException {
         // The final argument to {@code requestLocationUpdates()} is a LocationListener
         // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
-        LocationServices.FusedLocationApi.requestLocationUpdates(locationClient, mLocationRequest, callback);
+        if(locationClient != null) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(locationClient, mLocationRequest, callback);
+        }
     }
 
     private void stopLocationUpdates() {
         // It is a good practice to remove location requests when the activity is in a paused or
         // stopped state. Doing so helps battery performance and is especially
         // recommended in applications that request frequent location updates.
-        LocationServices.FusedLocationApi.removeLocationUpdates(locationClient, callback);
+        if(locationClient != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(locationClient, callback);
+        }
     }
 
     @Override
@@ -163,7 +167,9 @@ public abstract class GoogleMapsActivity extends RuntimePermissionsActivity {
 
     private void handleGmsConnectionResult(int resultCode) {
         if (resultCode == RESULT_OK) {
-            locationClient.connect();
+            if(locationClient != null) {
+                locationClient.connect();
+            }
         }
     }
 
