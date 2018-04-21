@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,39 +24,42 @@ import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
 import armymau.it.google_maps_library.R;
 import core.utils.CoreConstants;
 import google_maps_library.utils.GoogleMapsConstants;
 
-public abstract class GoogleMapsFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public abstract class GoogleMapsFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private GoogleApiClient locationClient;
-    private LocationRequest mLocationRequest;
+    private GoogleApiClient googleApiClient;
+    private LocationRequest locationRequest;
+    private FusedLocationProviderClient fusedLocationProviderClient;
 
     @Override
     public void onPause() {
         super.onPause();
         // Stop location updates to save battery, but don't disconnect the GoogleApiClient object.
-        if (locationClient != null && locationClient.isConnected())
+        if (googleApiClient != null && googleApiClient.isConnected())
             stopLocationUpdates();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(locationClient != null && locationClient.isConnected())
-            locationClient.disconnect();
+        if(googleApiClient != null && googleApiClient.isConnected())
+            googleApiClient.disconnect();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if(locationClient != null && !locationClient.isConnected())
-            locationClient.connect();
+        if(googleApiClient != null && !googleApiClient.isConnected())
+            googleApiClient.connect();
     }
 
     @Override
@@ -66,39 +70,30 @@ public abstract class GoogleMapsFragment extends Fragment implements GoogleApiCl
     }
 
     private void initGoogleApi() {
-        locationClient = createLocationClient(getActivity());
+        googleApiClient = createLocationClient(getActivity());
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
         createLocationRequest();
     }
 
-    private synchronized GoogleApiClient createLocationClient(Context context) {
-        return new GoogleApiClient.Builder(context)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
     private void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
+        locationRequest = LocationRequest.create();
 
         // Sets the desired interval for active location updates. This interval is
         // inexact. You may not receive updates at all if no location sources are available, or
         // you may receive them slower than requested. You may also receive updates faster than
         // requested if other applications are requesting location at a faster interval.
-        mLocationRequest.setInterval(GoogleMapsConstants.UPDATE_INTERVAL_IN_MILLISECONDS);
+        locationRequest.setInterval(GoogleMapsConstants.UPDATE_INTERVAL_IN_MILLISECONDS);
 
         // Sets the fastest rate for active location updates. This interval is exact, and your
         // application will never receive updates faster than this value.
-        mLocationRequest.setFastestInterval(GoogleMapsConstants.FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+        locationRequest.setFastestInterval(GoogleMapsConstants.FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
 
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     public void startLocationUpdates() throws SecurityException {
-        // The final argument to {@code requestLocationUpdates()} is a LocationListener
-        // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
-        if(locationClient != null) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(locationClient, mLocationRequest, this);
+        if(googleApiClient != null) {
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
         }
     }
 
@@ -106,15 +101,15 @@ public abstract class GoogleMapsFragment extends Fragment implements GoogleApiCl
         // It is a good practice to remove location requests when the activity is in a paused or
         // stopped state. Doing so helps battery performance and is especially
         // recommended in applications that request frequent location updates.
-        if(locationClient != null) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(locationClient, this);
+        if(googleApiClient != null) {
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
         }
     }
 
     private void handleGmsConnectionResult(int resultCode) {
         if (resultCode == Activity.RESULT_OK) {
-            if(locationClient != null) {
-                locationClient.connect();
+            if(googleApiClient != null) {
+                googleApiClient.connect();
             }
         }
     }
@@ -160,20 +155,23 @@ public abstract class GoogleMapsFragment extends Fragment implements GoogleApiCl
         }
     }
 
-    public GoogleApiClient getLocationClient() {
-        return locationClient;
-    }
-
     public void checkLocationManager() {
-        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         boolean gps_enabled = false; boolean network_enabled = false;
-        try {
-            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch(Exception ex) {}
 
-        try {
-            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        } catch(Exception ex) {}
+        if (locationManager != null) {
+            try {
+                gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            try {
+                network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
         if (!gps_enabled && !network_enabled) {
             AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
@@ -239,14 +237,29 @@ public abstract class GoogleMapsFragment extends Fragment implements GoogleApiCl
     //***************************************************
 
 
-    /* LocationListener */
-    @Override
-    public void onLocationChanged(Location location) {
+    public GoogleApiClient getLocationClient() {
+        return googleApiClient;
+    }
+
+    private synchronized GoogleApiClient createLocationClient(Context context) {
+        return new GoogleApiClient.Builder(context)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    private LocationCallback locationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            onLocationChanged(locationResult.getLastLocation());
+        }
+    };
+
+    private void onLocationChanged(Location location) {
         Log.d(GoogleMapsConstants.TAG, "Location >>> latitude : " + location.getLatitude() + " longitude : " + location.getLongitude());
         onLocationRetrieved(location);
     }
-    //***************************************************
-
 
     public abstract void onLocationRetrieved(Location location);
 }
