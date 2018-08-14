@@ -1,1 +1,1 @@
-include ':google_maps_library'
+include ':google_maps_library_kt'

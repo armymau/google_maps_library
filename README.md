@@ -23,11 +23,11 @@ Add it in your root build.gradle at the end of repositories:
 
 ```	
   dependencies {
-  	implementation 'com.github.armymau:google_maps_library:v1.4'
+  	implementation 'com.github.armymau:google_maps_library:v1.5'
   }
 ```
 
-**Step 3**. You Extend your AppCompatActivity with GoogleMapsActivity (or MapFragment extends GoogleMapsFragment) class and you can implements onLocationRetrieved(Location var1) method to get automatically the device position.
+**Step 3**. You Extend your AppCompatActivity with GoogleMapsActivity (or MapFragment extends GoogleMapsFragment) class and you can implements onLocationRetrieved(location : Location) method to get automatically the device position.
 
 
 
