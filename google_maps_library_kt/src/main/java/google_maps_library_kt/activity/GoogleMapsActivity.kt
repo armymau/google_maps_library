@@ -15,15 +15,15 @@ import android.util.Log
 import armymau.it.google_maps_library.R
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.*
-import core.activity.RuntimePermissionsActivity
+import core_kt.activity.RuntimePermissionsActivity
 import google_maps_library_kt.listener.GoogleApiClientConnectionListener
 import google_maps_library_kt.utils.*
 
-abstract class GoogleMapsActivity : RuntimePermissionsActivity() {
+open abstract class GoogleMapsActivity : RuntimePermissionsActivity() {
 
-    lateinit var locationRequest: LocationRequest
-    lateinit var googleApiClient: GoogleApiClient
-    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var locationRequest: LocationRequest
+    private lateinit var googleApiClient: GoogleApiClient
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             onLocationChanged(locationResult.lastLocation)

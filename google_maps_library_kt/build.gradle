@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 7
-        versionName "1.6"
+        versionCode 8
+        versionName "1.7"
         multiDexEnabled true
     }
     buildTypes {
@@ -37,5 +37,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation 'com.google.maps.android:android-maps-utils:0.5+'
 
-    implementation 'com.github.armymau:core_library:v1.12'
+    implementation 'com.github.armymau:core_library:v1.17'
 }
