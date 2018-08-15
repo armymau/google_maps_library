@@ -22,7 +22,7 @@ import armymau.it.google_maps_library.R
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.*
-import core.utils.CoreConstants
+import core_kt.utils.CHECK_PERMISSIONS_REQUEST_CODE
 import google_maps_library_kt.utils.*
 
 abstract class GoogleMapsFragment : Fragment(), GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -127,7 +127,7 @@ abstract class GoogleMapsFragment : Fragment(), GoogleApiClient.ConnectionCallba
         intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
         intent.addCategory(Intent.CATEGORY_DEFAULT)
         intent.data = Uri.parse("package:" + activity!!.packageName)
-        startActivityForResult(intent, CoreConstants.CHECK_PERMISSIONS_REQUEST_CODE)
+        startActivityForResult(intent, CHECK_PERMISSIONS_REQUEST_CODE)
     }
 
     private fun onPermissionsGranted(requestCode: Int) {
