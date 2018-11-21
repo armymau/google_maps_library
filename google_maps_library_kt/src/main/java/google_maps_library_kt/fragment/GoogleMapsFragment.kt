@@ -61,9 +61,11 @@ abstract class GoogleMapsFragment : Fragment(), GoogleApiClient.ConnectionCallba
     }
 
     private fun initGoogleApi() {
-        googleApiClient = createLocationClient(activity)
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity!!)
-        createLocationRequest()
+        activity?.apply {
+            googleApiClient = createLocationClient(this)
+            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+            createLocationRequest()
+        }
     }
 
     private fun createLocationRequest() {
@@ -118,16 +120,20 @@ abstract class GoogleMapsFragment : Fragment(), GoogleApiClient.ConnectionCallba
         if (grantResults.isNotEmpty() && permissionCheck == PackageManager.PERMISSION_GRANTED) {
             onPermissionsGranted(requestCode)
         } else {
-            Snackbar.make(activity!!.findViewById(android.R.id.content), this.resources.getString(armymau.it.core_library.R.string.core_runtime_permissions_settings_txt), Snackbar.LENGTH_INDEFINITE).setAction(armymau.it.core_library.R.string.core_application_settings, this.onSnackbarPermissionsResult).show()
+            activity?.let {
+                Snackbar.make(it.findViewById(android.R.id.content), this.resources.getString(armymau.it.core_library.R.string.core_runtime_permissions_settings_txt), Snackbar.LENGTH_INDEFINITE).setAction(armymau.it.core_library.R.string.core_application_settings, this.onSnackbarPermissionsResult).show()
+            }
         }
     }
 
     private val onSnackbarPermissionsResult = View.OnClickListener {
-        val intent = Intent()
-        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-        intent.addCategory(Intent.CATEGORY_DEFAULT)
-        intent.data = Uri.parse("package:" + activity!!.packageName)
-        startActivityForResult(intent, CHECK_PERMISSIONS_REQUEST_CODE)
+        activity?.apply {
+            val intent = Intent()
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            intent.addCategory(Intent.CATEGORY_DEFAULT)
+            intent.data = Uri.parse("package:" + this.packageName)
+            startActivityForResult(intent, CHECK_PERMISSIONS_REQUEST_CODE)
+        }
     }
 
     private fun onPermissionsGranted(requestCode: Int) {
@@ -137,31 +143,35 @@ abstract class GoogleMapsFragment : Fragment(), GoogleApiClient.ConnectionCallba
     }
 
     fun checkLocationManager() {
-        val locationManager = activity!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        var gps_enabled = false
-        var network_enabled = false
 
-        try {
-            gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
+        activity?.let { ctx->
+            val locationManager = ctx.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-        try {
-            network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
+            var gps_enabled = false
+            var network_enabled = false
+
+            try {
+                gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+
+            try {
+                network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
 
 
-        if (!gps_enabled && !network_enabled) {
-            val dialog = AlertDialog.Builder(activity!!)
-            dialog.setMessage(activity!!.resources.getString(R.string.gps_network_not_enabled))
-            dialog.setPositiveButton(activity!!.resources.getString(R.string.button_ok_label)) { _, _ -> activity!!.startActivityForResult(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), OPEN_LOCATION_SETTINGS_REQUEST_CODE) }
-            dialog.setNegativeButton(activity!!.resources.getString(R.string.button_cancel_label)) { _, _ -> }
-            dialog.show()
-        } else {
-            startLocationUpdates()
+            if (!gps_enabled && !network_enabled) {
+                val dialog = AlertDialog.Builder(ctx)
+                dialog.setMessage(ctx.resources.getString(R.string.gps_network_not_enabled))
+                dialog.setPositiveButton(ctx.resources.getString(R.string.button_ok_label)) { _, _ -> ctx.startActivityForResult(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), OPEN_LOCATION_SETTINGS_REQUEST_CODE) }
+                dialog.setNegativeButton(ctx.resources.getString(R.string.button_cancel_label)) { _, _ -> }
+                dialog.show()
+            } else {
+                startLocationUpdates()
+            }
         }
     }
 
@@ -196,11 +206,15 @@ abstract class GoogleMapsFragment : Fragment(), GoogleApiClient.ConnectionCallba
                 connectionResult.startResolutionForResult(activity, RC_CONNECT)
             } catch (e: IntentSender.SendIntentException) {
                 Log.e(TAG, "Unable to resolve connection issue", e)
-                Snackbar.make(activity!!.findViewById(android.R.id.content), "GMS result resolution failed, see log", Snackbar.LENGTH_LONG).show()
+                activity?.let {
+                    Snackbar.make(it.findViewById(android.R.id.content), "GMS result resolution failed, see log", Snackbar.LENGTH_LONG).show()
+                }
             }
 
         } else {
-            Snackbar.make(activity!!.findViewById(android.R.id.content), "GMS connection failed: " + connectionResult.errorCode, Snackbar.LENGTH_LONG).show()
+            activity?.let {
+                Snackbar.make(it.findViewById(android.R.id.content), "GMS connection failed: " + connectionResult.errorCode, Snackbar.LENGTH_LONG).show()
+            }
         }
     }
     //***************************************************
@@ -211,8 +225,8 @@ abstract class GoogleMapsFragment : Fragment(), GoogleApiClient.ConnectionCallba
     }
 
     @Synchronized
-    private fun createLocationClient(context: Context?): GoogleApiClient {
-        return GoogleApiClient.Builder(context!!)
+    private fun createLocationClient(context: Context): GoogleApiClient {
+        return GoogleApiClient.Builder(context)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
