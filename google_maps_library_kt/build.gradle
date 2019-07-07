@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 10
-        versionName "1.9"
+        versionCode 12
+        versionName "1.11"
         multiDexEnabled true
     }
     buildTypes {
@@ -21,7 +21,7 @@ android {
 }
 
 ext.anko_version='0.10.5'
-def supportVersion = "28.0.0-rc01"
+def supportVersion = "28.0.0"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -33,9 +33,9 @@ dependencies {
     implementation "com.android.support:appcompat-v7:$supportVersion"
     implementation "com.android.support:design:$supportVersion"
 
-    implementation 'com.google.android.gms:play-services-maps:15.0.1'
-    implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation 'com.google.android.gms:play-services-maps:16.0.0'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
     implementation 'com.google.maps.android:android-maps-utils:0.5+'
 
-    implementation 'com.github.armymau:core_library:v1.17'
+    implementation 'com.github.armymau:core_library:v1.34'
 }
