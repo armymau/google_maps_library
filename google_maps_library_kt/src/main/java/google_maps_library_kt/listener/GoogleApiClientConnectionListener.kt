@@ -3,11 +3,11 @@ package google_maps_library_kt.listener
 import android.content.Context
 import android.content.IntentSender
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.util.Log
 import android.view.View
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.material.snackbar.Snackbar
 import google_maps_library_kt.activity.GoogleMapsActivity
 import google_maps_library_kt.utils.RC_CONNECT
 import google_maps_library_kt.utils.TAG

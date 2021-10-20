@@ -13,15 +13,15 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
-import android.support.design.widget.Snackbar
-import android.support.v4.app.Fragment
-import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
 import armymau.it.google_maps_library.R
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.*
+import com.google.android.material.snackbar.Snackbar
 import core_kt.utils.CHECK_PERMISSIONS_REQUEST_CODE
 import google_maps_library_kt.utils.*
 
