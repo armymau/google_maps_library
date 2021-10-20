@@ -24,7 +24,6 @@ open abstract class GoogleMapsActivity : RuntimePermissionsActivity() {
 
     private lateinit var locationRequest: LocationRequest
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    //private lateinit var googleApiClient: GoogleApiClient
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
@@ -32,32 +31,8 @@ open abstract class GoogleMapsActivity : RuntimePermissionsActivity() {
         }
     }
 
-    /*
-    override fun onDestroy() {
-        super.onDestroy()
-        if (googleApiClient.isConnected)
-            googleApiClient.disconnect()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        // Stop location updates to save battery, but don't disconnect the GoogleApiClient object.
-        if (googleApiClient.isConnected)
-            stopLocationUpdates()
-    }
-    */
-
-    /*
-    override fun onStart() {
-        super.onStart()
-        if (!googleApiClient.isConnected)
-            googleApiClient.connect()
-    }
-    */
-
     override fun onResume() {
         super.onResume()
-        //if (requestingLocationUpdates)
         startLocationUpdates()
     }
 
@@ -72,8 +47,6 @@ open abstract class GoogleMapsActivity : RuntimePermissionsActivity() {
     }
 
     private fun initGoogleApi() {
-        //val googleApiClientConnectionListener = GoogleApiClientConnectionListener(this)
-        //googleApiClient = createLocationClient(this, googleApiClientConnectionListener)
         val builder = LocationSettingsRequest.Builder()
         val client: SettingsClient = LocationServices.getSettingsClient(this)
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
@@ -84,7 +57,6 @@ open abstract class GoogleMapsActivity : RuntimePermissionsActivity() {
         task.addOnSuccessListener { locationSettingsResponse ->
             // All location settings are satisfied. The client can initialize
             // location requests here.
-            // ...
             startLocationUpdates()
         }
 
@@ -104,24 +76,6 @@ open abstract class GoogleMapsActivity : RuntimePermissionsActivity() {
     }
 
     private fun createLocationRequest() {
-        /*
-        locationRequest = LocationRequest.create()
-
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-
-        // Sets the desired interval for active location updates. This interval is
-        // inexact. You may not receive updates at all if no location sources are available, or
-        // you may receive them slower than requested. You may also receive updates faster than
-        // requested if other applications are requesting location at a faster interval.
-        locationRequest.interval = UPDATE_INTERVAL_IN_MILLISECONDS
-
-        // Sets the fastest rate for active location updates. This interval is exact, and your
-        // application will never receive updates faster than this value.
-        locationRequest.fastestInterval = FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS
-
-         */
-
-
         locationRequest = LocationRequest.create().apply {
             // Sets the desired interval for active location updates. This interval is
             // inexact. You may not receive updates at all if no location sources are available, or
@@ -136,18 +90,6 @@ open abstract class GoogleMapsActivity : RuntimePermissionsActivity() {
         }
     }
 
-    /*
-    @Synchronized
-    private fun createLocationClient(context: Context, listener: GoogleApiClientConnectionListener): GoogleApiClient {
-        return GoogleApiClient.Builder(context)
-                .addConnectionCallbacks(listener)
-                .addOnConnectionFailedListener(listener)
-                .addApi(LocationServices.API)
-                .build()
-    }
-
-     */
-
     fun checkLocationPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             super@GoogleMapsActivity.onRequestAppPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), R.string.core_runtime_permissions_txt, GOOGLE_MAPS_PERMISSION_REQUEST_LOCATION)
@@ -161,28 +103,6 @@ open abstract class GoogleMapsActivity : RuntimePermissionsActivity() {
             checkLocationManager()
         }
     }
-
-    /*
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        Log.d(TAG, "onActivityResult:$requestCode:$resultCode:$data")
-
-        if (requestCode == RC_CONNECT) {
-            handleGmsConnectionResult(resultCode)
-        }
-    }
-
-    private fun handleGmsConnectionResult(resultCode: Int) {
-        if (resultCode == Activity.RESULT_OK) {
-            googleApiClient.connect()
-        }
-    }
-
-    fun getLocationClient(): GoogleApiClient {
-        return googleApiClient
-    }
-
-     */
 
     private fun checkLocationManager() {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager

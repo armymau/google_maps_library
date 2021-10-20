@@ -23,7 +23,7 @@ Add it in your root build.gradle at the end of repositories:
 
 ```	
   dependencies {
-  	implementation 'com.github.armymau:google_maps_library:v1.6'
+  	implementation 'com.github.armymau:google_maps_library:v1.14'
   }
 ```
 
